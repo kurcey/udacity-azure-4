@@ -22,12 +22,14 @@ from opencensus.ext.azure.trace_exporter import AzureExporter
 from opencensus.trace.samplers import ProbabilitySampler
 from opencensus.trace.tracer import Tracer
 from opencensus.ext.flask.flask_middleware import FlaskMiddleware
+from opencensus.ext.azure.log_exporter import AzureEventHandler
 
 # Logging
 #logger = # TODO: Setup logger
-#handler = LoggingHandler('<YOUR INSTRUMENTATION KEY GOES HERE>')
-logging.basicConfig(format='%(levelname)s: %(message)s', level=logging.DEBUG)
 logger = logging.getLogger(__name__)
+logger.addHandler(AzureEventHandler(connection_string='InstrumentationKey=c902824f-d43b-42f6-8b71-ca0bf9dc4d08'))
+logger.setLevel(logging.INFO)
+
 
 # Metrics
 #exporter = # TODO: Setup exporter
@@ -95,11 +97,13 @@ def index():
         vote1 = r.get(button1).decode('utf-8')
         # TODO: use tracer object to trace cat vote
         tracer.span(name='Cat Vote')
+        logger.info('Cat Vote')
         #print('Cat votes = ' + vote1)
 
         vote2 = r.get(button2).decode('utf-8')
         # TODO: use tracer object to trace dog vote
         tracer.span(name='Dog vote')
+        logger.info('Dog vote')
         #print('Dog votes = ' + vote2)
 
         # Return index with values
@@ -120,8 +124,8 @@ def index():
             r.incr(vote,1)            
             properties = {'custom_dimensions': {'Cats Vote': vote1}}
             # TODO: use logger object to log cat vote
-            logging.debug('Cat votes = ' + vote1)
-            tracer.span(properties)
+            logger.info('Cat vote')
+            tracer.span('Cat vote')
             print('Cat votes = ' + vote1)
             return render_template("index.html", value1=int(vote1), value2=int(vote2), button1=button1, button2=button2, title=title)
 
@@ -129,8 +133,8 @@ def index():
             r.incr(vote,1)            
             properties = {'custom_dimensions': {'Dogs Vote': vote2}}
             # TODO: use logger object to log dog vote
-            logging.debug('Dog votes = ' + vote2)
-            tracer.span(properties)
+            logger.info('Dog vote')
+            tracer.span('Dog vote')
             print('Dog votes = ' + vote2)
             return render_template("index.html", value1=int(vote1), value2=int(vote2), button1=button1, button2=button2, title=title)
 
