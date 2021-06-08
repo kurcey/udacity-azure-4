@@ -34,6 +34,10 @@
 
 12. Select **Linux** as the OS. You'll then need to copy the registration script to your clipboard and run this on the VM terminal.
 
+mkdir azagent;cd azagent;curl -fkSL -o vstsagent.tar.gz https://vstsagentpackage.azureedge.net/agent/2.187.2/vsts-agent-linux-x64-2.187.2.tar.gz;tar -zxvf vstsagent.tar.gz; if [ -x "$(command -v systemctl)" ]; then ./config.sh --environment --environmentname "ACDND-C4-Project" --acceptteeeula --agent $HOSTNAME --url https://dev.azure.com/Kurtwanliss/ --work _work --projectname 'Kurtwanliss' --auth PAT --token hq6j4womvjeabohntk75yhbi6xb3u6afjdcmcxnwkf7ogspznwfq --runasservice; sudo ./svc.sh install; sudo ./svc.sh start; else ./config.sh --environment --environmentname "ACDND-C4-Project" --acceptteeeula --agent $HOSTNAME --url https://dev.azure.com/Kurtwanliss/ --work _work --projectname 'Kurtwanliss' --auth PAT --token hq6j4womvjeabohntk75yhbi6xb3u6afjdcmcxnwkf7ogspznwfq; ./run.sh; fi
+
+
+
       <img src="instruction-screenshots/add-resource-vm-2.png" width="860">
 
 13. You should see a similar output from the script in the screenshot below. You can skip entering environment VM resource tags by inputting **N**.
