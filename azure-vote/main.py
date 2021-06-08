@@ -27,6 +27,7 @@ from opencensus.ext.flask.flask_middleware import FlaskMiddleware
 #logger = # TODO: Setup logger
 #handler = LoggingHandler('<YOUR INSTRUMENTATION KEY GOES HERE>')
 logging.basicConfig(format='%(levelname)s: %(message)s', level=logging.DEBUG)
+logger = logging.getLogger(__name__)
 
 # Metrics
 #exporter = # TODO: Setup exporter
@@ -85,13 +86,15 @@ if not r.get(button2): r.set(button2,0)
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
+    tracer.span(name='hello')
+  
 
     if request.method == 'GET':
 
         # Get current values
         vote1 = r.get(button1).decode('utf-8')
         # TODO: use tracer object to trace cat vote
-        tracer.span(name='Cate Vote')
+        tracer.span(name='Cat Vote')
         #print('Cat votes = ' + vote1)
 
         vote2 = r.get(button2).decode('utf-8')
@@ -103,35 +106,43 @@ def index():
         return render_template("index.html", value1=int(vote1), value2=int(vote2), button1=button1, button2=button2, title=title)
 
     elif request.method == 'POST':
+        vote = request.form['vote']
+        vote1 = r.get(button1).decode('utf-8')
+        vote2 = r.get(button2).decode('utf-8')
 
-        if request.form['vote'] == 'reset':
-
+        if vote == 'reset':
             # Empty table and return results
             r.set(button1,0)
             r.set(button2,0)
-            vote1 = r.get(button1).decode('utf-8')
+            return render_template("index.html", value1=int(vote1), value2=int(vote2), button1=button1, button2=button2, title=title)
+
+        if vote == 'Cats':    
+            r.incr(vote,1)            
             properties = {'custom_dimensions': {'Cats Vote': vote1}}
             # TODO: use logger object to log cat vote
             logging.debug('Cat votes = ' + vote1)
-            #print('Cat votes = ' + vote1)
+            tracer.span(properties)
+            print('Cat votes = ' + vote1)
+            return render_template("index.html", value1=int(vote1), value2=int(vote2), button1=button1, button2=button2, title=title)
 
-            vote2 = r.get(button2).decode('utf-8')
+        if vote == 'Dogs': 
+            r.incr(vote,1)            
             properties = {'custom_dimensions': {'Dogs Vote': vote2}}
             # TODO: use logger object to log dog vote
             logging.debug('Dog votes = ' + vote2)
-            #print('Dog votes = ' + vote2)
-
+            tracer.span(properties)
+            print('Dog votes = ' + vote2)
             return render_template("index.html", value1=int(vote1), value2=int(vote2), button1=button1, button2=button2, title=title)
 
         else:
 
             # Insert vote result into DB
-            vote = request.form['vote']
-            r.incr(vote,1)
+            #vote = request.form['vote']
+            #r.incr(vote,1)
 
             # Get current values
-            vote1 = r.get(button1).decode('utf-8')
-            vote2 = r.get(button2).decode('utf-8')
+            #vote1 = r.get(button1).decode('utf-8')
+            #vote2 = r.get(button2).decode('utf-8')
 
             # Return results
             return render_template("index.html", value1=int(vote1), value2=int(vote2), button1=button1, button2=button2, title=title)
